@@ -7,7 +7,6 @@ from models import storage
 from api.v1.views import app_views
 
 
-
 @app_views.route('/states', methods=['GET'], strict_slashes=False)
 def get_states():
     """Get States"""
@@ -40,9 +39,10 @@ def delete_state(state_id):
 @app_views.route('/states', methods=['POST'], strict_slashes=False)
 def create_state():
     """Post State"""
-    if not request.get__json(force=True, silent=True):
+    data = request.get__json(force=True, silent=True)
+    if not data:
         abort(400, 'Not a JSON')
-    if 'name' not in request.get__json(force=True, silent=True):
+    if 'name' not in data:
         abort(400, 'Missing name')
     state = State(**request.json)
     state.save()
