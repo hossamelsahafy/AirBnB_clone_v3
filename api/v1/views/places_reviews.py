@@ -61,6 +61,8 @@ def create_review(place_id):
     new_review.save()
     return jsonify(new_review.to_dict()), 201
 
+# work pgaa ya koodsoomk
+
 
 @app_views.route('/reviews/<review_id>', methods=['PUT'], strict_slashes=False)
 def update_review(review_id):
