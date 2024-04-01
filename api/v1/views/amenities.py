@@ -46,7 +46,7 @@ def create_amenity():
     if 'name' not in data:
         abort(404, 'Missing name')
     new_amenity = Amenity(**data)
-    new_amenity.save()
+    storage.save()
     return jsonify(new_amenity.to_dict()), 201
 
 
