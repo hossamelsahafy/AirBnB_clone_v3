@@ -86,3 +86,91 @@ class TestFileStorage(unittest.TestCase):
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_save(self):
         """Test that save properly saves objects to file.json"""
+
+    def setUp(self):
+        """Set up for each test"""
+        self.db_storage = DBStorage()
+        self.model = BaseModel()
+        self.model.save()
+
+
+class TestStorageMethods(unittest.TestCase):
+    """Test Class"""
+
+    def setUp(self):
+        """Set up test environment."""
+        self.storage = storage
+        self.first_state_id = list(self.storage.all(State).values())[0].id
+        self.user_id = "user_123"  # Replace with a known user ID
+
+    def test_count_all(self):
+        """Test counting all objects."""
+        expected_count = 992
+        actual_count = self.storage.count()
+        self.assertEqual(actual_count, expected_count)
+
+    # Additional more test cases
+
+    def test_get_user(self):
+        user = self.storage.get(User, self.user_id)
+        self.assertIsInstance(user, User)
+        self.assertEqual(user.id, self.user_id)
+
+    def test_count_users(self):
+        expected_user_count = 15
+        actual_user_count = self.storage.count(User)
+        self.assertEqual(actual_user_count, expected_user_count)
+
+    def test_get_unsupported_class(self):
+        # Replace UnsupportedClass with a non-supported class
+        obj = self.storage.get(UnsupportedClass, 123)
+        self.assertIsNone(obj)
+
+    def test_count_non_existent_class(self):
+        with self.assertRaises(AttributeError):
+            # Replace with a non-existent class
+            self.storage.count(NonExistentClass)
+
+    def test_get_non_existent_object(self):
+        obj = self.storage.get(State, "non-existent-id")
+        self.assertIsNone(obj)
+
+    def test_count_all_objects(self):
+        expected_count = 50  # Adjust with the expected total count of all objects
+        actual_count = self.storage.count()
+        self.assertEqual(actual_count, expected_count)
+    def test_invalid_connection_string(self):
+        with self.assertRaises(SpecificException):
+        storage = DBStorage("invalid_connection_string")
+
+# Edge Cases - Large Dataset
+
+def test_large_dataset_performance(self):
+    # Generate a large number of objects (adjust count as needed)
+    for _ in range(1000):
+        obj = State()
+        self.db_storage.new(obj)  # Assuming DBStorage.new() creates database records
+
+    start_time = time.time()
+    self.db_storage.all()
+    elapsed_time = time.time() - start_time
+
+# Assert that execution time is within acceptable limits
+
+# Database Interaction
+
+def test_create_record(self):
+    new_state = State(name="New State")
+    self.db_storage.new(new_state)
+    self.db_storage.save()
+
+    # Query the database to verify record creation (implementation depends on your database)
+
+    db_state = # Query to retrieve the newly created state
+
+    self.assertEqual(db_state.name, new_state.name)
+
+# Filtering (assuming DBStorage supports filtering)
+
+def test_filter_by_state_name(self):
+    filtered_objects = self.db_storage.all(State, name="California")

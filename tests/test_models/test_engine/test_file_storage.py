@@ -113,3 +113,56 @@ class TestFileStorage(unittest.TestCase):
         with open("file.json", "r") as f:
             js = f.read()
         self.assertEqual(json.loads(string), json.loads(js))
+
+
+class TestFileStorage(unittest.TestCase):
+
+    def test_get_empty_storage(self):
+        """Test get with empty storage."""
+        self.storage._FileStorage__objects.clear()
+        self.assertIsNone(self.storage.get(State, "any_id"))
+
+    def test_count_empty_storage(self):
+        """Test count with empty storage."""
+        self.storage._FileStorage__objects.clear()
+        self.assertEqual(self.storage.count(), 0)
+        self.assertEqual(self.storage.count(State), 0)
+
+    def test_get_multiple_objects(self):
+        """Test get with multiple objects of the same class."""
+        third_state = State()
+        self.storage.new(third_state)
+        self.storage.save()
+
+        second_state_id = list(self.storage.all(State).values())[1].id
+        self.assertEqual(self.storage.get(State, second_state_id), self.state2)
+
+    def test_get_different_class(self):
+        """Test get with an object of a different class."""
+        user = User()
+        self.storage.new(user)
+        self.storage.save()
+
+        self.assertIsNone(self.storage.get(State, user.id))
+
+    def test_get_with_none_id(self):
+        """Test get with None as id."""
+        self.assertIsNone(self.storage.get(State, None))
+
+    def test_count_with_none_class(self):
+        """Test count with None as class."""
+        with self.assertRaises(TypeError):
+            self.storage.count(None)
+
+    def test_invalid_json_format(self):
+        with open("file.json", "w") as f:
+            f.write("This is not valid JSON")  # Invalid JSON
+
+        with self.assertRaises(Exception):  # Replace Exception with specific type
+            storage = FileStorage()
+
+        os.remove("file.json")
+
+    def test_nonexistent_file(self):
+        with self.assertRaises(FileNotFoundError):
+            storage = FileStorage("nonexistent_file.json")
