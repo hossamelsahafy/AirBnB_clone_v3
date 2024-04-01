@@ -1,16 +1,16 @@
 #!/usr/bin/python3
-"""Cities"""
+"""City"""
 from flask import Flask, jsonify, abort, request
+from models.city import City
+from models.state import State
 from models import storage
 from api.v1.views import app_views
-from models.state import State
-from models.city import City
 
 
 @app_views.route('/states/<state_id>/cities', methods=['GET'],
                  strict_slashes=False)
 def get_cities(state_id):
-    """Get cities"""
+    """Get Cities of a State"""
     state = storage.get(State, state_id)
     if state is None:
         abort(404)
@@ -22,7 +22,7 @@ def get_cities(state_id):
 
 @app_views.route('/cities/<city_id>', methods=['GET'], strict_slashes=False)
 def get_city(city_id):
-    """Get city Id"""
+    """Get City ID"""
     city = storage.get(City, city_id)
     if city is None:
         abort(404)
@@ -43,21 +43,23 @@ def delete_city(city_id):
 @app_views.route('/states/<state_id>/cities', methods=['POST'],
                  strict_slashes=False)
 def create_city(state_id):
-    """Create City"""
-    data = request.get_json(force=True, silent=True)
+    """Post City"""
     state = storage.get(State, state_id)
     if state is None:
         abort(404)
+    data = request.get_json(force=True, silent=True)
     if not data:
         abort(400, 'Not a JSON')
     if 'name' not in data:
         abort(400, 'Missing name')
+    data['state_id'] = state_id
     new_city = City(**data)
     new_city.save()
     return jsonify(new_city.to_dict()), 201
 
 
-@app_views.route('/cities/<city_id>', methods=['PUT'], strict_slashes=False)
+@app_views.route('/cities/<city_id>', methods=['PUT'],
+                 strict_slashes=False)
 def update_city(city_id):
     """Update City"""
     city = storage.get(City, city_id)
@@ -67,7 +69,7 @@ def update_city(city_id):
     if not data:
         abort(400, 'Not a JSON')
     for key, value in data.items():
-        if key not in ['id', 'created_at', 'updated_at', 'state_id']:
+        if key not in ['id', 'state_id', 'created_at', 'updated_at']:
             setattr(city, key, value)
     city.save()
     return jsonify(city.to_dict()), 200
