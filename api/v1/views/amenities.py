@@ -1,14 +1,14 @@
 #!/usr/bin/python3
-"""Amenities"""
+"""Amenity"""
 from flask import Flask, jsonify, abort, request
+from models.amenity import Amenity
 from models import storage
 from api.v1.views import app_views
-from models.amenity import Amenity
 
 
 @app_views.route('/amenities', methods=['GET'], strict_slashes=False)
-def get_amenity():
-    """Get Amenity"""
+def get_amenities():
+    """Get Amenities"""
     all_amenities = []
     for amenity in storage.all(Amenity).values():
         all_amenities.append(amenity.to_dict())
@@ -17,8 +17,8 @@ def get_amenity():
 
 @app_views.route('/amenities/<amenity_id>', methods=['GET'],
                  strict_slashes=False)
-def get_id(amenity_id):
-    """Get Amenity Id"""
+def get_amenity(amenity_id):
+    """Get Amenity ID"""
     amenity = storage.get(Amenity, amenity_id)
     if amenity is None:
         abort(404)
@@ -37,14 +37,15 @@ def delete_amenity(amenity_id):
     return jsonify({}), 200
 
 
-@app_views.route('/amenities', methods=['POST'], strict_slashes=False)
+@app_views.route('/amenities', methods=['POST'],
+                 strict_slashes=False)
 def create_amenity():
-    """Create Amenity."""
+    """Post Amenity"""
     data = request.get_json(force=True, silent=True)
     if not data:
-        abort(404, 'Not a JSON')
+        abort(400, 'Not a JSON')
     if 'name' not in data:
-        abort(404, 'Missing name')
+        abort(400, 'Missing name')
     new_amenity = Amenity(**data)
     new_amenity.save()
     return jsonify(new_amenity.to_dict()), 201
