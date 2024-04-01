@@ -46,13 +46,14 @@ def create_amenity():
     if 'name' not in data:
         abort(404, 'Missing name')
     new_amenity = Amenity(**data)
-    storage.save()
+    new_amenity.save()
     return jsonify(new_amenity.to_dict()), 201
 
 
 @app_views.route('/amenities/<amenity_id>', methods=['PUT'],
                  strict_slashes=False)
 def update_amenity(amenity_id):
+    """Update Amenity"""
     amenity = storage.get(Amenity, amenity_id)
     if amenity is None:
         abort(404)
