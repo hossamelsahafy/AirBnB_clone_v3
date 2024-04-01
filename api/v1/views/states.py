@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 """State"""
-from flask import Flask, jsonify, abort, request, Response
-import json
+from flask import Flask, jsonify, abort, request
 from models.state import State
 from models import storage
 from api.v1.views import app_views
@@ -10,8 +9,10 @@ from api.v1.views import app_views
 @app_views.route('/states', methods=['GET'], strict_slashes=False)
 def get_states():
     """Get States"""
-    states = [state.to_dict() for state in storage.all(State).values()]
-    return Response(json.dumps(states, indent=4), mimetype='application/json')
+    all_states = []
+    for state in storage.all(State).values():
+        all_states.append(state.to_dict())
+    return jsonify(all_states)
 
 
 @app_views.route('/states/<state_id>', methods=['GET'], strict_slashes=False)
@@ -20,8 +21,7 @@ def get_state(state_id):
     state = storage.get(State, state_id)
     if state is None:
         abort(404)
-    return Response(json.dumps(state.to_dict(), indent=4),
-                    mimetype='application/json')
+    return jsonify(state.to_dict())
 
 
 @app_views.route('/states/<state_id>', methods=['DELETE'],
@@ -44,10 +44,9 @@ def create_state():
         abort(400, 'Not a JSON')
     if 'name' not in data:
         abort(400, 'Missing name')
-    state = State(**request.json)
-    state.save()
-    return Response(json.dumps(state.to_dict(), indent=4),
-                    mimetype='application/json'), 201
+    new_state = State(**data)
+    new_state.save()
+    return jsonify(new_state.to_dict()), 201
 
 
 @app_views.route('/states/<state_id>', methods=['PUT'], strict_slashes=False)
@@ -56,11 +55,11 @@ def update_state(state_id):
     state = storage.get(State, state_id)
     if state is None:
         abort(404)
-    if not request.json:
+    data = request.get_json(force=True, silent=True)
+    if not data:
         abort(400, 'Not a JSON')
-    for key, value in request.json.items():
+    for key, value in data.items():
         if key not in ['id', 'created_at', 'updated_at']:
             setattr(state, key, value)
     state.save()
-    return Response(json.dumps(state.to_dict(), indent=4),
-                    mimetype='application/json'), 200
+    return jsonify(state.to_dict()), 200
